@@ -30,7 +30,7 @@ public class OperationController {
    }
 
    @GetMapping("/{ticker}/position")
-   public Position gePosition(@PathVariable String ticker) {
+   public Position getPosition(@PathVariable String ticker) {
       BigDecimal total = BigDecimal.ZERO;
 
       for (Operation operation : operations) {
@@ -49,13 +49,21 @@ public class OperationController {
    @PostMapping 
    @ResponseStatus(HttpStatus.CREATED)
    public Operation create(@Valid @RequestBody OperationRequest request) {
+
+      if(request.type() == OperationType.SELL) {
+         Position position = getPosition(request.ticker());
+         if(request.quantity().compareTo(position.quantity()) > 0) {
+            throw new IllegalArgumentException("No puedes vender " + request.quantity() + " " + request.ticker() + ": solo tienes " + position.quantity());
+         }
+      }
       Operation operation = new Operation(
-         nextId.getAndIncrement(),
-         request.ticker(),
-         request.type(),
-         request.quantity(),
-         request.price(),
-         request.date());
+      nextId.getAndIncrement(),
+      request.ticker(),
+      request.type(),
+      request.quantity(),
+      request.price(),
+      request.date());
+   
       operations.add(operation);
       return operation;
    }

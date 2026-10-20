@@ -32,4 +32,10 @@ public class GlobalExceptionHandler {
                HttpStatus.BAD_REQUEST,
                "JSON mal formado o con un valor no permitido (type debe ser BUY o SELL)");
    }
+
+   @ExceptionHandler(IllegalArgumentException.class)
+   public ProblemDetail handleIllegalArgument(IllegalArgumentException ex) {
+      return ProblemDetail.forStatusAndDetail(
+         HttpStatus.BAD_REQUEST, ex.getMessage());
+   }
 }
