@@ -1,4 +1,4 @@
-package com.alvaro.tracker;
+package com.alvaro.tracker.exception;
 
 import java.util.HashMap;
 import java.util.Map;

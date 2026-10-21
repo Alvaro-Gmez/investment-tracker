@@ -1,4 +1,4 @@
-package com.alvaro.tracker;
+package com.alvaro.tracker.controller;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -13,6 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.alvaro.tracker.model.Invested;
+import com.alvaro.tracker.model.Operation;
+import com.alvaro.tracker.model.OperationRequest;
+import com.alvaro.tracker.model.OperationType;
+import com.alvaro.tracker.model.Position;
 
 import jakarta.validation.Valid;
 

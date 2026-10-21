@@ -1,4 +1,4 @@
-package com.alvaro.tracker;
+package com.alvaro.tracker.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
