@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.stereotype.Service;
 
+import com.alvaro.tracker.exception.InsufficientPositionException;
 import com.alvaro.tracker.model.Invested;
 import com.alvaro.tracker.model.Operation;
 import com.alvaro.tracker.model.OperationRequest;
@@ -59,7 +60,7 @@ public class OperationService {
       if(request.type() == OperationType.SELL) {
          Position position = getPosition(request.ticker());
          if(request.quantity().compareTo(position.quantity()) > 0) {
-            throw new IllegalArgumentException("No puedes vender " + request.quantity() + " " + request.ticker().toUpperCase() + ": solo tienes " + position.quantity());
+            throw new InsufficientPositionException("No puedes vender " + request.quantity() + " " + request.ticker().toUpperCase() + ": solo tienes " + position.quantity());
          }
       }
       Operation operation = new Operation(
