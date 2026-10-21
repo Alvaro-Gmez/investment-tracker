@@ -24,11 +24,13 @@ public class OperationController {
    private final List<Operation> operations = new ArrayList<>();
    private final AtomicLong nextId = new AtomicLong(1);
 
+   // Listado general de operaciones
    @GetMapping 
    public List<Operation> findAll () {
       return operations;
    }
 
+   // Listado de posiciones del mismo ticker
    @GetMapping("/{ticker}/position")
    public Position getPosition(@PathVariable String ticker) {
       BigDecimal total = BigDecimal.ZERO;
@@ -42,10 +44,25 @@ public class OperationController {
             }
          }
       }
-      return new Position(ticker, total);
+      return new Position(ticker.toUpperCase(), total);
    }
 
+   // Listado de posiciones del mismo ticker
+   @GetMapping("/{ticker}/invested")
+   public Invested getInvested(@PathVariable String ticker) {
+      BigDecimal total = BigDecimal.ZERO;
 
+      for (Operation operation : operations) {
+         if (operation.ticker().equalsIgnoreCase(ticker)) {
+            if(operation.type() == OperationType.BUY) {
+               total = total.add(operation.price().multiply(operation.quantity()));
+            } 
+         }
+      }
+      return new Invested(ticker.toUpperCase(), total);
+   }
+
+   // Creacion de operacion y validacion en caso de venta
    @PostMapping 
    @ResponseStatus(HttpStatus.CREATED)
    public Operation create(@Valid @RequestBody OperationRequest request) {
@@ -58,7 +75,7 @@ public class OperationController {
       }
       Operation operation = new Operation(
       nextId.getAndIncrement(),
-      request.ticker(),
+      request.ticker().toUpperCase(),
       request.type(),
       request.quantity(),
       request.price(),
