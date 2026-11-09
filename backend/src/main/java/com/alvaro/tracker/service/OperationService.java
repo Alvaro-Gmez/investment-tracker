@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.stereotype.Service;
 
 import com.alvaro.tracker.exception.InsufficientPositionException;
+import com.alvaro.tracker.model.Count;
 import com.alvaro.tracker.model.Invested;
 import com.alvaro.tracker.model.Operation;
 import com.alvaro.tracker.model.OperationRequest;
@@ -53,6 +54,19 @@ public class OperationService {
          }
       }
       return new Invested(ticker.toUpperCase(), total);
+   }
+
+   // Conteo de las operaciones del mismo ticker
+   public Count getCount(String ticker) {
+      int operacionesTotales = 0;
+
+      for(Operation operation : operations) {
+         if(operation.ticker().equalsIgnoreCase(ticker)) {
+            operacionesTotales += 1;
+         }
+      }
+
+      return new Count(ticker.toUpperCase(), operacionesTotales);
    }
 
    // Creacion de operacion y validacion en caso de venta

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alvaro.tracker.model.Count;
 import com.alvaro.tracker.model.Invested;
 import com.alvaro.tracker.model.Operation;
 import com.alvaro.tracker.model.OperationRequest;
@@ -42,6 +43,11 @@ public class OperationController {
    @GetMapping("/{ticker}/invested")
    public Invested getInvested(@PathVariable String ticker) {
       return operationService.getInvested(ticker);
+   }
+
+   @GetMapping("/{ticker}/count")
+   public Count getCount(@PathVariable String ticker) {
+      return operationService.getCount(ticker);
    }
 
    @PostMapping 
