@@ -33,13 +33,11 @@ public class OperationService {
    public Position getPosition(String ticker) {
       BigDecimal total = BigDecimal.ZERO;
 
-      for (Operation operation : operationRepository.findAll()) {
-         if (operation.getTicker().equalsIgnoreCase(ticker)) {
-            if(operation.getType() == OperationType.BUY) {
-               total = total.add(operation.getQuantity());
-            } else {
-               total = total.subtract(operation.getQuantity());
-            }
+      for (Operation operation : operationRepository.findByTicker(ticker.toUpperCase())) {
+         if(operation.getType() == OperationType.BUY) {
+            total = total.add(operation.getQuantity());
+         } else {
+            total = total.subtract(operation.getQuantity());
          }
       }
       return new Position(ticker.toUpperCase(), total);
@@ -49,25 +47,17 @@ public class OperationService {
    public Invested getInvested(String ticker) {
       BigDecimal total = BigDecimal.ZERO;
 
-      for (Operation operation : operationRepository.findAll()) {
-         if (operation.getTicker().equalsIgnoreCase(ticker)) {
-            if(operation.getType() == OperationType.BUY) {
-               total = total.add(operation.getPrice().multiply(operation.getQuantity()));
-            } 
-         }
+      for (Operation operation : operationRepository.findByTicker(ticker.toUpperCase())) {
+         if(operation.getType() == OperationType.BUY) {
+            total = total.add(operation.getPrice().multiply(operation.getQuantity()));
+         } 
       }
       return new Invested(ticker.toUpperCase(), total);
    }
 
    // Conteo de las operaciones del mismo ticker
    public Count getCount(String ticker) {
-      int count = 0;
-
-      for(Operation operation : operationRepository.findAll()) {
-         if(operation.getTicker().equalsIgnoreCase(ticker)) {
-            count += 1;
-         }
-      }
+      int count = operationRepository.findByTicker(ticker.toUpperCase()).size();
       return new Count(ticker.toUpperCase(), count);
    }
 
