@@ -2,7 +2,10 @@ package com.alvaro.tracker.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -59,6 +62,7 @@ class OperationServiceTest {
       // Act + Assert
       assertThatThrownBy(() -> operationService.create(request))
          .isInstanceOf(InsufficientPositionException.class);
+      verify(operationRepository, never()).save(any(Operation.class));
    }
 
    @Test
@@ -76,5 +80,20 @@ class OperationServiceTest {
       //Assert
       assertThat(invested.ticker()).isEqualTo("AAPL");
       assertThat(invested.invested()).isEqualByComparingTo("2300");
+   }
+
+   @Test
+   void create_ventaValida_guardaOperacion() {
+      // Arrange: Devuelve una compra de 10 AAPL y un request de venta de 5
+      when(operationRepository.findByTicker("AAPL")).thenReturn(List.of(
+         new Operation("AAPL", OperationType.BUY, new BigDecimal("10"), new BigDecimal("150"), LocalDate.of(2026, 10, 1))
+      ));
+      OperationRequest request = new OperationRequest("AAPL", OperationType.SELL, new BigDecimal("5"), new BigDecimal("160"), LocalDate.of(2026, 10, 10));
+
+      // Act
+      operationService.create(request);
+
+      // Assert
+      verify(operationRepository).save(any(Operation.class));
    }
 }
