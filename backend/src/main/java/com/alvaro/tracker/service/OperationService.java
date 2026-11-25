@@ -8,20 +8,23 @@ import org.springframework.stereotype.Service;
 import com.alvaro.tracker.exception.InsufficientPositionException;
 import com.alvaro.tracker.model.Count;
 import com.alvaro.tracker.model.Invested;
+import com.alvaro.tracker.model.Lot;
 import com.alvaro.tracker.model.Operation;
 import com.alvaro.tracker.model.OperationRequest;
 import com.alvaro.tracker.model.OperationType;
 import com.alvaro.tracker.model.Position;
-
+import com.alvaro.tracker.repository.LotRepository;
 import com.alvaro.tracker.repository.OperationRepository;
 
 @Service 
 public class OperationService {
 
    private final OperationRepository operationRepository;
+   private final LotRepository lotRepository;
 
-   public OperationService (OperationRepository operationRepository) {
+   public OperationService (OperationRepository operationRepository, LotRepository lotRepository) {
       this.operationRepository = operationRepository; 
+      this.lotRepository = lotRepository;
    }
 
    // Listado general de operaciones
@@ -69,13 +72,20 @@ public class OperationService {
             throw new InsufficientPositionException("No puedes vender " + request.quantity() + " " + request.ticker().toUpperCase() + ": solo tienes " + position.quantity());
          }
       }
-      Operation operation = new Operation(
-      request.ticker().toUpperCase(),
-      request.type(),
-      request.quantity(),
-      request.price(),
-      request.date());
 
-      return operationRepository.save(operation);
+      Operation operation = new Operation(
+         request.ticker().toUpperCase(),
+         request.type(),
+         request.quantity(),
+         request.price(),
+         request.date()
+      );
+      Operation saved = operationRepository.save(operation);
+
+      if(request.type() == OperationType.BUY) {
+         Lot lot = new Lot(request.ticker().toUpperCase(), request.date(), request.price(), request.quantity());
+         lotRepository.save(lot);
+      }
+      return saved;
    }
 }

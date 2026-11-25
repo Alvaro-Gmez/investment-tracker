@@ -19,10 +19,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.alvaro.tracker.exception.InsufficientPositionException;
 import com.alvaro.tracker.model.Invested;
+import com.alvaro.tracker.model.Lot;
 import com.alvaro.tracker.model.Operation;
 import com.alvaro.tracker.model.OperationRequest;
 import com.alvaro.tracker.model.OperationType;
 import com.alvaro.tracker.model.Position;
+import com.alvaro.tracker.repository.LotRepository;
 import com.alvaro.tracker.repository.OperationRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,6 +32,9 @@ class OperationServiceTest {
 
    @Mock
    private OperationRepository operationRepository;
+   
+   @Mock
+   private LotRepository lotRepository;
 
    @InjectMocks
    private OperationService operationService;
@@ -95,5 +100,17 @@ class OperationServiceTest {
 
       // Assert
       verify(operationRepository).save(any(Operation.class));
+   }
+
+   @Test 
+   void create_compra_creaLote() {
+      // Arrange 
+      OperationRequest request = new OperationRequest("AAPL", OperationType.BUY, new BigDecimal("10"), new BigDecimal("150"), LocalDate.of(2026, 10, 1));
+
+      // Act
+      operationService.create(request);
+
+      // Assert
+      verify(lotRepository).save(any(Lot.class));
    }
 }
