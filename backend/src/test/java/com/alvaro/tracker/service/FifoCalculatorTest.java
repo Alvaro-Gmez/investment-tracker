@@ -77,7 +77,44 @@ public class FifoCalculatorTest {
 
    @Test
    void sell_dosVentasSeguidas_laSegundaContinuaDondeAcaboLaPrimera() { // Caso 4
-      
+      // Arrange
+      Lot loteA = new Lot("AAPL", LocalDate.of(2026, 1, 1), new BigDecimal("20"), new BigDecimal("5"));
+      Lot loteB = new Lot("AAPL", LocalDate.of(2026, 2, 1), new BigDecimal("30"), new BigDecimal("5"));
+      Lot loteC = new Lot("AAPL", LocalDate.of(2026, 3, 1), new BigDecimal("40"), new BigDecimal("5"));
+      FifoCalculator calculator = new FifoCalculator();
+
+      // Act
+      List<LotConsumption> venta1 = calculator.sell(List.of(loteA, loteB, loteC), new BigDecimal("7"), new BigDecimal("35"));
+      List<LotConsumption> venta2 = calculator.sell(List.of(loteA, loteB, loteC), new BigDecimal("6"), new BigDecimal("25"));
+
+      // Assert
+      assertThat(venta1).hasSize(2);
+      LotConsumption a = venta1.get(0);
+      assertThat(a.quantity()).isEqualByComparingTo("5");
+      assertThat(a.cost()).isEqualByComparingTo("100");
+      assertThat(a.proceeds()).isEqualByComparingTo("175");
+      assertThat(a.result()).isEqualByComparingTo("75");
+      LotConsumption b = venta1.get(1);
+      assertThat(b.quantity()).isEqualByComparingTo("2");
+      assertThat(b.cost()).isEqualByComparingTo("60");
+      assertThat(b.proceeds()).isEqualByComparingTo("70");
+      assertThat(b.result()).isEqualByComparingTo("10");
+
+      assertThat(venta2).hasSize(2);
+      LotConsumption c = venta2.get(0);
+      assertThat(c.quantity()).isEqualByComparingTo("3");
+      assertThat(c.cost()).isEqualByComparingTo("90");
+      assertThat(c.proceeds()).isEqualByComparingTo("75");
+      assertThat(c.result()).isEqualByComparingTo("-15");
+      LotConsumption d = venta2.get(1);
+      assertThat(d.quantity()).isEqualByComparingTo("3");
+      assertThat(d.cost()).isEqualByComparingTo("120");
+      assertThat(d.proceeds()).isEqualByComparingTo("75");
+      assertThat(d.result()).isEqualByComparingTo("-45");
+
+      assertThat(loteA.getRemainingQuantity()).isEqualByComparingTo("0");
+      assertThat(loteB.getRemainingQuantity()).isEqualByComparingTo("0");
+      assertThat(loteC.getRemainingQuantity()).isEqualByComparingTo("2");
    }
 
    @Test 
