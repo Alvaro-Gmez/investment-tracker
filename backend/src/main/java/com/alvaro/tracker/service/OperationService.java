@@ -68,15 +68,30 @@ public class OperationService {
    }
 
    // Creacion de operacion y validacion en caso de venta
+   private void validateSale(OperationRequest request) {
+      Position position = getPosition(request.ticker());
+      if(request.quantity().compareTo(position.quantity()) > 0) {
+         throw new InsufficientPositionException("No puedes vender " + request.quantity() + " " + request.ticker().toUpperCase() + ": solo tienes " + position.quantity());
+      }
+   }
+
+   private void registerBuy(OperationRequest request) {
+      Lot lot = new Lot(request.ticker().toUpperCase(), request.date(), request.price(), request.quantity());
+      lotRepository.save(lot);
+   }
+
+   private void registerSale(OperationRequest request) {
+      List<Lot> lots = lotRepository.findByTickerOrderByDateAsc(request.ticker().toUpperCase());
+      fifoCalculator.sell(lots, request.quantity(), request.price());
+      lotRepository.saveAll(lots);
+   }
+   
    @Transactional 
    public Operation create(OperationRequest request) {
       if(request.type() == OperationType.SELL) {
-         Position position = getPosition(request.ticker());
-         if(request.quantity().compareTo(position.quantity()) > 0) {
-            throw new InsufficientPositionException("No puedes vender " + request.quantity() + " " + request.ticker().toUpperCase() + ": solo tienes " + position.quantity());
-         }
+         validateSale(request);
       }
-
+      
       Operation operation = new Operation(
          request.ticker().toUpperCase(),
          request.type(),
@@ -87,13 +102,11 @@ public class OperationService {
       Operation saved = operationRepository.save(operation);
 
       if(request.type() == OperationType.BUY) {
-         Lot lot = new Lot(request.ticker().toUpperCase(), request.date(), request.price(), request.quantity());
-         lotRepository.save(lot);
+         registerBuy(request);
       } else {
-         List<Lot> lots = lotRepository.findByTickerOrderByDateAsc(request.ticker().toUpperCase());
-         fifoCalculator.sell(lots, request.quantity(), request.price());
-         lotRepository.saveAll(lots);
+         registerSale(request);
       }
+
       return saved;
    }
 }
