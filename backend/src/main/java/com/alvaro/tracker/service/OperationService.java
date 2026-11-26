@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alvaro.tracker.exception.InsufficientPositionException;
 import com.alvaro.tracker.model.Count;
@@ -67,6 +68,7 @@ public class OperationService {
    }
 
    // Creacion de operacion y validacion en caso de venta
+   @Transactional 
    public Operation create(OperationRequest request) {
       if(request.type() == OperationType.SELL) {
          Position position = getPosition(request.ticker());
