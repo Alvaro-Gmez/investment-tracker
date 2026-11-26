@@ -21,10 +21,12 @@ public class OperationService {
 
    private final OperationRepository operationRepository;
    private final LotRepository lotRepository;
+   private final FifoCalculator fifoCalculator;
 
-   public OperationService (OperationRepository operationRepository, LotRepository lotRepository) {
+   public OperationService (OperationRepository operationRepository, LotRepository lotRepository, FifoCalculator fifoCalculator) {
       this.operationRepository = operationRepository; 
       this.lotRepository = lotRepository;
+      this.fifoCalculator = fifoCalculator;
    }
 
    // Listado general de operaciones
@@ -85,6 +87,10 @@ public class OperationService {
       if(request.type() == OperationType.BUY) {
          Lot lot = new Lot(request.ticker().toUpperCase(), request.date(), request.price(), request.quantity());
          lotRepository.save(lot);
+      } else {
+         List<Lot> lots = lotRepository.findByTickerOrderByDateAsc(request.ticker().toUpperCase());
+         fifoCalculator.sell(lots, request.quantity(), request.price());
+         lotRepository.saveAll(lots);
       }
       return saved;
    }

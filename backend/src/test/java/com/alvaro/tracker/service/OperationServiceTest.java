@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.alvaro.tracker.exception.InsufficientPositionException;
@@ -35,6 +36,9 @@ class OperationServiceTest {
    
    @Mock
    private LotRepository lotRepository;
+
+   @Spy // Mockito se asegura de que entre el componente real
+   private FifoCalculator fifoCalculator = new FifoCalculator();
 
    @InjectMocks
    private OperationService operationService;
@@ -112,5 +116,25 @@ class OperationServiceTest {
 
       // Assert
       verify(lotRepository).save(any(Lot.class));
+   }
+
+   @Test 
+   void create_venta_consumeLotesPorFifo() {
+      // Arrange 
+      when(operationRepository.findByTicker("AAPL")).thenReturn(List.of(
+         new Operation("AAPL", OperationType.BUY, new BigDecimal("10"), new BigDecimal("100"), LocalDate.of(2026, 11, 1))
+      ));
+      Lot lote = new Lot("AAPL", LocalDate.of(2026, 11, 1), new BigDecimal("100"), new BigDecimal("10"));
+      when(lotRepository.findByTickerOrderByDateAsc("AAPL")).thenReturn(List.of(lote));
+
+      OperationRequest request = new OperationRequest("aapl", OperationType.SELL, new BigDecimal("4"), new BigDecimal("120"), LocalDate.of(2026, 11, 30));
+
+      // Act
+      operationService.create(request);
+      
+
+      // Assert
+      assertThat(lote.getRemainingQuantity()).isEqualByComparingTo("6");
+      verify(lotRepository).saveAll(List.of(lote));
    }
 }
